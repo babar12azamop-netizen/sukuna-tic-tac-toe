@@ -1,40 +1,239 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SNAKE KILLA</title>
+    <title>Sukuna Tic-Tac-Toe</title>
+    
+    <script src="https://pl29645921.effectivecpmnetwork.com/7c/2e/ca/7c2eca2805cf777029a3250e6bb59bf6.js"></script>
+
     <style>
-        body { background: #000; color: #fff; text-align: center; margin: 0; padding: 0; }
-        canvas { border: 2px solid #00ff00; background: #222; display: block; margin: 20px auto; }
-        .btn { padding: 20px; font-size: 20px; margin: 5px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            background: #060a12; color: #fff; font-family: 'Segoe UI', Roboto, sans-serif; 
+            display: flex; justify-content: center; align-items: center; min-height: 100vh; 
+            padding-bottom: 110px; overflow-x: hidden;
+        }
+        #loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #060a12; z-index: 100000;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease;
+        }
+        .spinner {
+            width: 60px; height: 60px; border: 4px solid #1f325c; border-top: 4px solid #4facfe;
+            border-radius: 50%; animation: spin 1s linear infinite; box-shadow: 0 0 15px rgba(79, 172, 254, 0.5); margin-bottom: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loading-text { font-size: 1.3rem; color: #4facfe; text-shadow: 0 0 10px rgba(79, 172, 254, 0.6); font-weight: bold; letter-spacing: 2px; }
+
+        #charSelection {
+            text-align: center; max-width: 400px; width: 100%; padding: 25px; background: #0d1527; border-radius: 20px; border: 1px solid #1f325c;
+            box-shadow: 0 0 30px rgba(79, 172, 254, 0.2); display: none;
+        }
+        .char-title { color: #4facfe; font-size: 1.6rem; margin-bottom: 25px; text-shadow: 0 0 15px rgba(79, 172, 254, 0.5); }
+        .char-container { display: flex; justify-content: space-around; gap: 15px; margin-bottom: 20px; }
+        .char-card { background: #111a30; border: 2px solid #1f325c; border-radius: 15px; padding: 15px; width: 45%; cursor: pointer; transition: all 0.3s ease; }
+        .char-card:hover { border-color: #4facfe; box-shadow: 0 0 15px rgba(79, 172, 254, 0.3); }
+        .char-card.gojo-card.selected { border-color: #00f2fe; box-shadow: 0 0 20px rgba(0, 242, 254, 0.6); background: #132542; }
+        .char-card.sukuna-card.selected { border-color: #ff4b5c; box-shadow: 0 0 20px rgba(255, 75, 92, 0.6); background: #2b141d; }
+        .char-avatar { font-size: 3rem; margin-bottom: 10px; display: block; }
+        .char-name { font-weight: bold; font-size: 1.1rem; }
+        .gojo-name { color: #00f2fe; text-shadow: 0 0 10px rgba(0, 242, 254, 0.4); }
+        .sukuna-name { color: #ff4b5c; text-shadow: 0 0 10px rgba(255, 75, 92, 0.4); }
+        .start-game-btn { background: #4facfe; width: 100%; padding: 12px; border: none; border-radius: 8px; color: #fff; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-top: 15px; transition: 0.3s; }
+        .start-game-btn:hover { background: #00f2fe; box-shadow: 0 0 15px rgba(0, 242, 254, 0.5); }
+
+        .game-container { 
+            text-align: center; max-width: 400px; width: 100%; padding: 25px; background: #0d1527; border-radius: 20px; border: 1px solid #1f325c;
+            box-shadow: 0 0 30px rgba(79, 172, 254, 0.25); display: none;
+        }
+        h1 { color: #4facfe; margin-bottom: 15px; font-size: 2rem; text-shadow: 0 0 20px rgba(79, 172, 254, 0.7); }
+        .status { margin-bottom: 20px; font-size: 1.2rem; background: #131f3b; padding: 10px; border-radius: 10px; border: 1px solid #1c2e59; }
+        .status-turn { color: #00f2fe; font-weight: bold; text-shadow: 0 0 10px rgba(0, 242, 254, 0.6); }
+        .board { display: grid; grid-template-columns: repeat(3, 1fr); grid-gap: 12px; justify-content: center; margin-bottom: 25px; }
+        .cell { 
+            aspect-ratio: 1; background: #111a30; border: 2px solid #1f325c; border-radius: 15px; 
+            display: flex; justify-content: center; align-items: center; font-size: 2.8rem; font-weight: bold; cursor: pointer; transition: all 0.25s ease; 
+        }
+        .cell:hover { background: #172442; border-color: #4facfe; box-shadow: 0 0 15px rgba(79, 172, 254, 0.4); }
+        .cell.gojo-glow { color: #00f2fe; text-shadow: 0 0 25px #00f2fe, 0 0 10px rgba(0, 242, 254, 0.5); box-shadow: inset 0 0 15px rgba(0, 242, 254, 0.3); }
+        .cell.sukuna-glow { color: #ff4b5c; text-shadow: 0 0 25px #ff4b5c, 0 0 10px rgba(255, 75, 92, 0.5); box-shadow: inset 0 0 15px rgba(255, 75, 92, 0.3); }
+        .mode-selection { display: flex; justify-content: center; gap: 12px; margin-bottom: 20px; }
+        button { padding: 12px 18px; background: #162445; border: 1px solid #253b73; border-radius: 8px; color: #fff; font-weight: bold; cursor: pointer; transition: all 0.3s ease; }
+        button.active { background: #4facfe; border-color: #00f2fe; box-shadow: 0 0 15px rgba(79, 172, 254, 0.6); }
+        .reset-btn { background: #ff4b5c; width: 100%; max-width: 220px; margin: 0 auto; display: block; box-shadow: 0 0 10px rgba(255, 75, 92, 0.3); }
+        .reset-btn:hover { background: #ff6b7b; box-shadow: 0 0 15px rgba(255, 75, 92, 0.5); }
     </style>
 </head>
 <body>
-    <h1>SNAKE KILLA 🐍</h1>
-    <canvas id="game" width="300" height="300"></canvas>
-    <div>
-        <button class="btn" onclick="dir='UP'">🔼</button><br>
-        <button class="btn" onclick="dir='LEFT'">◀️</button>
-        <button class="btn" onclick="dir='DOWN'">🔽</button>
-        <button class="btn" onclick="dir='RIGHT'">▶️</button>
+
+<div id="loader">
+    <div class="spinner"></div>
+    <div class="loading-text">SUKUNA DOMAIN EXPANSION...</div>
+</div>
+
+<div id="charSelection">
+    <h2 class="char-title">CHOOSE YOUR JUJUTSU SORCERER</h2>
+    <div class="char-container">
+        <div class="char-card gojo-card selected" onclick="selectCharacter('Gojo')">
+            <span class="char-avatar">👁️‍عون</span>
+            <span class="char-name gojo-name">Gojo Satoru</span>
+        </div>
+        <div class="char-card sukuna-card" onclick="selectCharacter('Sukuna')">
+            <span class="char-avatar">💀</span>
+            <span class="char-name sukuna-name">Ryomen Sukuna</span>
+        </div>
     </div>
-    <script>
-        const canvas = document.getElementById("game");
-        const ctx = canvas.getContext("2d");
-        let s = [{x:10,y:10}], f = {x:15,y:15}, dir = "RIGHT";
-        function loop() {
-            let h = {x: s[0].x, y: s[0].y};
-            if(dir=="UP") h.y--; if(dir=="DOWN") h.y++; if(dir=="LEFT") h.x--; if(dir=="RIGHT") h.x++;
-            if(h.x==f.x && h.y==f.y) f={x:Math.floor(Math.random()*15),y:Math.floor(Math.random()*15)}; else s.pop();
-            s.unshift(h);
-            ctx.fillStyle="#222"; ctx.fillRect(0,0,300,300);
-            ctx.fillStyle="red"; ctx.fillRect(f.x*20, f.y*20, 18, 18);
-            ctx.fillStyle="lime"; s.forEach(p => ctx.fillRect(p.x*20, p.y*20, 18, 18));
-            setTimeout(loop, 150);
+    <button class="start-game-btn" onclick="startGame()">ENTER THE DOMAIN</button>
+</div>
+
+<div class="game-container" id="gameContainer">
+    <h1>Sukuna Tic-Tac-Toe</h1>
+    <div class="mode-selection">
+        <button id="pvpBtn" class="active">Player vs Player</button>
+        <button id="pveBtn">Vs Shatar Bot 👿</button>
+    </div>
+    <div class="status" id="statusText">Player <span class="status-turn" id="turnLabel">X</span> ki baari hai</div>
+    <div class="board" id="board">
+        <div class="cell" data-index="0"></div>
+        <div class="cell" data-index="1"></div>
+        <div class="cell" data-index="2"></div>
+        <div class="cell" data-index="3"></div>
+        <div class="cell" data-index="4"></div>
+        <div class="cell" data-index="5"></div>
+        <div class="cell" data-index="6"></div>
+        <div class="cell" data-index="7"></div>
+        <div class="cell" data-index="8"></div>
+    </div>
+    <button class="reset-btn" id="resetBtn">Restart Game</button>
+</div>
+
+<script>
+    let audioCtx = null;
+    function initAudio() { if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } }
+    function playTone(freq, type, duration) {
+        try { initAudio(); if (!audioCtx) return;
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.type = type; osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + duration);
+        } catch(e){}
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+            const loader = document.getElementById('loader');
+            const charScreen = document.getElementById('charSelection');
+            loader.style.opacity = '0';
+            setTimeout(() => { loader.style.display = 'none'; charScreen.style.display = 'block'; }, 500);
+        }, 2500);
+    });
+
+    let userCharacter = "Gojo"; let p1Sign = "🔵"; let p2Sign = "🔴";
+
+    function selectCharacter(char) {
+        userCharacter = char; playTone(440, 'sine', 0.08);
+        document.querySelectorAll('.char-card').forEach(card => card.classList.remove('selected'));
+        if(char === 'Gojo') { document.querySelector('.gojo-card').classList.add('selected'); p1Sign = "🔵"; p2Sign = "🔴"; }
+        else { document.querySelector('.sukuna-card').classList.add('selected'); p1Sign = "🔴"; p2Sign = "🔵"; }
+    }
+
+    function startGame() {
+        playTone(587.33, 'square', 0.2);
+        document.getElementById('charSelection').style.display = 'none';
+        document.getElementById('gameContainer').style.display = 'block';
+        updateTurnDisplay();
+    }
+
+    const boardEl = document.getElementById('board'); const cells = document.querySelectorAll('.cell');
+    const statusText = document.getElementById('statusText'); const turnLabel = document.getElementById('turnLabel');
+    const resetBtn = document.getElementById('resetBtn'); const pvpBtn = document.getElementById('pvpBtn'); const pveBtn = document.getElementById('pveBtn');
+
+    let board = ["", "", "", "", "", "", "", "", ""]; let currentPlayer = "P1"; let isGameActive = true; let isVsBot = false; let isBotThinking = false; 
+
+    const winningConditions = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]];
+
+    function updateTurnDisplay() {
+        let currentSign = (currentPlayer === "P1") ? p1Sign : p2Sign;
+        let label = (currentPlayer === "P1") ? (userCharacter === "Gojo" ? "Gojo (You)" : "Sukuna (You)") : (isVsBot ? "Sukuna Bot 🤖" : (userCharacter === "Gojo" ? "Sukuna" : "Gojo"));
+        statusText.innerHTML = `Player <span class="status-turn">${label} [${currentSign}]</span> ki baari hai`;
+    }
+
+    function handleCellClick(e) {
+        initAudio(); const clickedCell = e.target; const clickedCellIndex = parseInt(clickedCell.getAttribute('data-index'));
+        if (board[clickedCellIndex] !== "" || !isGameActive || isBotThinking) return;
+        if(p1Sign === "🔵") playTone(600, 'sine', 0.15); else playTone(280, 'sawtooth', 0.15);
+        makeMove(clickedCell, clickedCellIndex, currentPlayer);
+        if (checkResult()) return;
+        if (isVsBot) { currentPlayer = "P2"; updateTurnDisplay(); isBotThinking = true; setTimeout(botMove, 600); }
+        else { currentPlayer = (currentPlayer === "P1") ? "P2" : "P1"; updateTurnDisplay(); }
+    }
+
+    function makeMove(cell, index, player) {
+        board[index] = player; let currentSign = (player === "P1") ? p1Sign : p2Sign; cell.innerText = currentSign;
+        if(currentSign === "🔵") cell.className = "cell gojo-glow"; else cell.className = "cell sukuna-glow";
+    }
+
+    function botMove() {
+        if (!isGameActive) { isBotThinking = false; return; }
+        let bestScore = -Infinity; let move = null;
+        for (let i = 0; i < 9; i++) {
+            if (board[i] === "") {
+                board[i] = "P2"; let score = minimax(board, 0, false); board[i] = "";
+                if (score > bestScore) { bestScore = score; move = i; }
+            }
         }
-        loop();
-    </script>
+        if (move !== null) {
+            const targetCell = document.querySelector(`[data-index='${move}']`);
+            if(p2Sign === "🔵") playTone(600, 'sine', 0.15); else playTone(280, 'sawtooth', 0.15);
+            makeMove(targetCell, move, "P2");
+            if (!checkResult()) { currentPlayer = "P1"; updateTurnDisplay(); }
+        }
+        isBotThinking = false; 
+    }
+
+    function minimax(currBoard, depth, isMaximizing) {
+        let result = evaluateBoard(); if (result !== null) return result;
+        if (isMaximizing) {
+            let bestScore = -Infinity;
+            for (let i = 0; i < 9; i++) { if (currBoard[i] === "") { currBoard[i] = "P2"; let score = minimax(currBoard, depth + 1, false); currBoard[i] = ""; bestScore = Math.max(score, bestScore); } }
+            return bestScore;
+        } else {
+            let bestScore = Infinity;
+            for (let i = 0; i < 9; i++) { if (currBoard[i] === "") { currBoard[i] = "X"; let score = minimax(currBoard, depth + 1, true); currBoard[i] = ""; bestScore = Math.min(score, bestScore); } }
+            return bestScore;
+        }
+    }
+
+    function evaluateBoard() {
+        for (let i = 0; i < winningConditions.length; i++) { const [a, b, c] = winningConditions[i]; if (board[a] && board[a] === board[b] && board[a] === board[c]) return board[a] === "P2" ? 10 : -10; }
+        if (!board.includes("")) return 0; return null;
+    }
+
+    function checkResult() {
+        let roundWon = false;
+        for (let i = 0; i < winningConditions.length; i++) { const [a, b, c] = winningConditions[i]; if (board[a] && board[a] === board[b] && board[a] === board[c]) { roundWon = true; break; } }
+        if (roundWon) {
+            playTone(440, 'square', 0.4); let winnerLabel = (isVsBot && currentPlayer === "P2") ? "Sukuna Bot 🤖" : ((currentPlayer === "P1") ? (userCharacter === "Gojo" ? "Gojo (You)" : "Sukuna (You)") : (userCharacter === "Gojo" ? "Sukuna" : "Gojo"));
+            statusText.innerHTML = `<span class="status-turn">${winnerLabel} Jeet Gaya! 🎉</span>`; isGameActive = false; return true;
+        }
+        if (!board.includes("")) { playTone(180, 'sawtooth', 0.3); statusText.innerHTML = "<span class='status-turn'>Match Draw Ho Gaya! 🤝</span>"; isGameActive = false; return true; }
+        return false;
+    }
+
+    function restartGame() { playTone(350, 'sine', 0.08); board = ["", "", "", "", "", "", "", "", ""]; isGameActive = true; isBotThinking = false; currentPlayer = "P1"; updateTurnDisplay(); cells.forEach(cell => { cell.innerText = ""; cell.className = "cell"; }); }
+    pvpBtn.addEventListener('click', () => { if(isBotThinking) return; isVsBot = false; pvpBtn.classList.add('active'); pveBtn.classList.remove('active'); restartGame(); });
+    pveBtn.addEventListener('click', () => { if(isBotThinking) return; isVsBot = true; pveBtn.classList.add('active'); pvpBtn.classList.remove('active'); restartGame(); });
+    cells.forEach(cell => cell.addEventListener('click', handleCellClick)); resetBtn.addEventListener('click', restartGame);
+</script>
+
+<div style="position: fixed; bottom: 0; left: 0; width: 100%; height: 90px; background: rgba(6,10,18,0.95); z-index: 99999; display: flex; justify-content: center; align-items: center; box-sizing: border-box; overflow: hidden; border-top: 1px solid #1f325c;">
+    <div style="width: 100%; max-width: 320px; height: 50px; text-align: center; margin: 0 auto; display: block;">
+        <script async="async" data-cfasync="false" src="https://pl29645921.effectivecpmnetwork.com/eb8d3b4d2e57ef0e4463753698a80a69/invoke.js"></script>
+        <div id="container-eb8d3b4d2e57ef0e4463753698a80a69"></div>
+    </div>
+</div>
+
 </body>
 </html>
-
