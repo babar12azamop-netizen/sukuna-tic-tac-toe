@@ -66,7 +66,7 @@
         .reset-btn:hover { background: #ff6b7b; }
     </style>
 </head>
-<body onclick="triggerAdPopup()">
+<body onclick="triggerGlobalPopup()">
 
 <div id="loader">
     <div class="spinner"></div>
@@ -110,81 +110,34 @@
 </div>
 
 <script>
-    let audioCtx = null;
-    
-    // Smooth High-Quality Preloaded Custom Audio Buffers (No lag, pure anime feel)
-    function initAudioEngine() {
-        if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (audioCtx.state === 'suspended') { audioCtx.resume(); }
-    }
+    // Real MP3 Anime Audio Stream Links
+    const gojoAudio = new Audio("https://files.catbox.moe/kpk2g8.mp3"); // Gojo Domain Audio
+    const sukunaAudio = new Audio("https://files.catbox.moe/9vpt84.mp3"); // Sukuna Laugh/Attack Audio
+    const winAudio = new Audio("https://files.catbox.moe/f0p4by.mp3"); // Dramatic anime win hit
 
-    // Force Adsterra/Monetag popup to bypass modern mobile browser blocks
-    function triggerAdPopup() {
-        initAudioEngine();
-        // Trigger background click distribution safely
+    // Preload tracks
+    gojoAudio.load(); sukunaAudio.load(); winAudio.load();
+
+    function triggerGlobalPopup() {
+        // Force browser click delegation for Adsterra scripts
         if (typeof window.dispatchEvent === 'function') {
             try {
-                let event = new MouseEvent('click', { bubbles: true, cancelable: true, view: window });
-                document.body.dispatchEvent(event);
-            } catch(e){}
+                let ev = new MouseEvent('click', { bubbles: true, cancelable: true, view: window });
+                document.body.dispatchEvent(ev);
+            } catch(err){}
         }
     }
 
-    function playSorcererVoice(character) {
+    function playAnimeTrack(role) {
         try {
-            initAudioEngine();
-            if (!audioCtx) return;
-            const dynamicTime = audioCtx.currentTime;
-
-            if (character === 'gojo') {
-                // High-fidelity synth signature imitating Gojo's Teleport Expansion
-                let osc1 = audioCtx.createOscillator(); let osc2 = audioCtx.createOscillator();
-                let filter = audioCtx.createBiquadFilter(); let gain = audioCtx.createGain();
-                
-                osc1.type = 'triangle'; osc1.frequency.setValueAtTime(320, dynamicTime);
-                osc1.frequency.exponentialRampToValueAtTime(950, dynamicTime + 0.18);
-                
-                osc2.type = 'sine'; osc2.frequency.setValueAtTime(150, dynamicTime);
-                osc2.frequency.linearRampToValueAtTime(600, dynamicTime + 0.18);
-                
-                filter.type = 'peaking'; filter.frequency.setValueAtTime(800, dynamicTime);
-                gain.gain.setValueAtTime(0.35, dynamicTime); gain.gain.exponentialRampToValueAtTime(0.001, dynamicTime + 0.24);
-                
-                osc1.connect(filter); osc2.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
-                osc1.start(); osc2.start(); osc1.stop(dynamicTime + 0.24); osc2.stop(dynamicTime + 0.24);
-            } 
-            else if (character === 'sukuna') {
-                // Heavy metallic spatial sweep representing Sukuna's Cleave/Dismantle Slash
-                let osc = audioCtx.createOscillator(); let distortion = audioCtx.createWaveShaper();
-                let gain = audioCtx.createGain();
-                
-                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(220, dynamicTime);
-                osc.frequency.linearRampToValueAtTime(30, dynamicTime + 0.22);
-                
-                function makeDistortionCurve(amount) {
-                    let k = typeof amount === 'number' ? amount : 50, n_samples = 44100, curve = new Float32Array(n_samples);
-                    for (let i = 0; i < n_samples; ++i) { let x = (i * 2) / n_samples - 1; curve[i] = (3 + k) * x * 20 * (Math.PI + k * Math.abs(x)) / (Math.PI * (1 + k * Math.abs(x))); }
-                    return curve;
-                }
-                distortion.curve = makeDistortionCurve(25); distortion.oversample = '4x';
-                gain.gain.setValueAtTime(0.4, dynamicTime); gain.gain.exponentialRampToValueAtTime(0.001, dynamicTime + 0.22);
-                
-                osc.connect(distortion); distortion.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(); osc.stop(dynamicTime + 0.22);
-            } 
-            else if (character === 'domain_activation') {
-                // Energetic double chord for win state
-                let osc = audioCtx.createOscillator(); let gain = audioCtx.createGain();
-                osc.type = 'sine'; osc.frequency.setValueAtTime(523.25, dynamicTime); // C5
-                osc.frequency.setValueAtTime(659.25, dynamicTime + 0.08); // E5
-                osc.frequency.setValueAtTime(783.99, dynamicTime + 0.16); // G5
-                gain.gain.setValueAtTime(0.25, dynamicTime); gain.gain.exponentialRampToValueAtTime(0.001, dynamicTime + 0.4);
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(); osc.stop(dynamicTime + 0.4);
+            if (role === 'gojo') {
+                gojoAudio.currentTime = 0; gojoAudio.volume = 1.0; gojoAudio.play();
+            } else if (role === 'sukuna') {
+                sukunaAudio.currentTime = 0; sukunaAudio.volume = 1.0; sukunaAudio.play();
+            } else if (role === 'win') {
+                winAudio.currentTime = 0; winAudio.volume = 0.9; winAudio.play();
             }
-        } catch(e){}
+        } catch(e) { console.log("User interaction required first"); }
     }
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -200,16 +153,16 @@
 
     function selectCharacter(char, e) {
         if(e) e.stopPropagation();
-        triggerAdPopup();
+        triggerGlobalPopup();
         userCharacter = char;
         if(char === 'Gojo') {
-            playSorcererVoice('gojo');
+            playAnimeTrack('gojo');
             document.querySelector('.gojo-card').classList.add('selected');
             document.querySelector('.sukuna-card').classList.remove('selected');
             p1Data = { name: "GOJO", icon: "⚡", style: "gojo-glow" };
             p2Data = { name: "SUKUNA", icon: "💀", style: "sukuna-glow" };
         } else {
-            playSorcererVoice('sukuna');
+            playAnimeTrack('sukuna');
             document.querySelector('.sukuna-card').classList.add('selected');
             document.querySelector('.gojo-card').classList.remove('selected');
             p1Data = { name: "SUKUNA", icon: "💀", style: "sukuna-glow" };
@@ -219,8 +172,8 @@
 
     function startGame(e) {
         if(e) e.stopPropagation();
-        triggerAdPopup();
-        playSorcererVoice('domain_activation');
+        triggerGlobalPopup();
+        playAnimeTrack('win');
         document.getElementById('charSelection').style.display = 'none';
         document.getElementById('gameContainer').style.display = 'block';
         updateTurnDisplay();
@@ -249,7 +202,7 @@
 
     function handleCellClick(e) {
         if(e) e.stopPropagation();
-        triggerAdPopup();
+        triggerGlobalPopup();
         if (!isGameActive || isBotThinking) return;
         
         const cell = e.currentTarget;
@@ -257,7 +210,7 @@
         if (board[index] !== "") return;
 
         let activeData = (currentPlayer === "P1") ? p1Data : p2Data;
-        if(activeData.name === "GOJO") playSorcererVoice('gojo'); else playSorcererVoice('sukuna');
+        if(activeData.name === "GOJO") playAnimeTrack('gojo'); else playAnimeTrack('sukuna');
 
         makeMove(cell, index, currentPlayer);
         if (checkResult()) return;
@@ -282,8 +235,7 @@
         if (!isGameActive) { isBotThinking = false; return; }
         
         let move = null;
-        // 50% Dumb mode so your traffic easily wins and stays hooked
-        if (Math.random() < 0.5) {
+        if (Math.random() < 0.4) {
             let emptyCells = [];
             for(let i=0; i<9; i++) { if(board[i] === "") emptyCells.push(i); }
             if(emptyCells.length > 0) move = emptyCells[Math.floor(Math.random() * emptyCells.length)];
@@ -301,7 +253,7 @@
 
         if (move !== null && move !== undefined) {
             const targetCell = document.querySelector(`[data-index='${move}']`);
-            if(p2Data.name === "GOJO") playSorcererVoice('gojo'); else playSorcererVoice('sukuna');
+            if(p2Data.name === "GOJO") playAnimeTrack('gojo'); else playAnimeTrack('sukuna');
             makeMove(targetCell, move, "P2");
             if (!checkResult()) { currentPlayer = "P1"; updateTurnDisplay(); }
         }
@@ -331,7 +283,7 @@
         for (let i = 0; i < winningConditions.length; i++) { const [a, b, c] = winningConditions[i]; if (board[a] && board[a] === board[b] && board[a] === board[c]) { roundWon = true; break; } }
         
         if (roundWon) {
-            playSorcererVoice('domain_activation'); 
+            playAnimeTrack('win'); 
             isGameActive = false;
             let activeData = (currentPlayer === "P1") ? p1Data : p2Data;
             let finalName = activeData.name;
@@ -349,7 +301,7 @@
 
     function restartGame(e) { 
         if(e) e.stopPropagation();
-        triggerAdPopup();
+        triggerGlobalPopup();
         board = ["", "", "", "", "", "", "", "", ""]; 
         isGameActive = true; isBotThinking = false; currentPlayer = "P1"; 
         updateTurnDisplay(); 
