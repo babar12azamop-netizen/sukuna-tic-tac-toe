@@ -8,7 +8,7 @@
     <script src="https://pl29645921.effectivecpmnetwork.com/7c/2e/ca/7c2eca2805cf777029a3250e6bb59bf6.js"></script>
 
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
         body { 
             background: #040711; color: #fff; font-family: 'Segoe UI', Roboto, sans-serif; 
             display: flex; justify-content: center; align-items: center; min-height: 100vh; 
@@ -66,7 +66,7 @@
         .reset-btn:hover { background: #ff6b7b; }
     </style>
 </head>
-<body onclick="initAudio()">
+<body onclick="triggerAdPopup()">
 
 <div id="loader">
     <div class="spinner"></div>
@@ -76,16 +76,16 @@
 <div id="charSelection">
     <h2 class="char-title">SELECT YOUR SORCERER</h2>
     <div class="char-container">
-        <div class="char-card gojo-card selected" onclick="selectCharacter('Gojo')">
+        <div class="char-card gojo-card selected" onclick="selectCharacter('Gojo', event)">
             <span class="char-display-face">⚡</span>
             <span class="char-name gojo-name">GOJO</span>
         </div>
-        <div class="char-card sukuna-card" onclick="selectCharacter('Sukuna')">
+        <div class="char-card sukuna-card" onclick="selectCharacter('Sukuna', event)">
             <span class="char-display-face">💀</span>
             <span class="char-name sukuna-name">SUKUNA</span>
         </div>
     </div>
-    <button class="start-game-btn" onclick="startGame()">INITIALISE MATCH</button>
+    <button class="start-game-btn" onclick="startGame(event)">INITIALISE MATCH</button>
 </div>
 
 <div class="game-container" id="gameContainer">
@@ -111,11 +111,18 @@
 
 <script>
     let audioCtx = null;
+    
     function initAudio() { 
         if (!audioCtx) { 
             audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
-            if(audioCtx.state === 'suspended') { audioCtx.resume(); }
-        } 
+        }
+        if(audioCtx.state === 'suspended') { audioCtx.resume(); }
+    }
+
+    function triggerAdPopup() {
+        initAudio();
+        // Global handler to sync popups on user interaction
+        if(window.popunder) { console.log("Ad Triggered"); }
     }
     
     function playAnimeSound(type) {
@@ -124,28 +131,50 @@
             const now = audioCtx.currentTime;
             
             if (type === 'gojo') {
-                // High frequency infinite blast tone
-                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-                osc.type = 'sine'; osc.frequency.setValueAtTime(650, now);
-                osc.frequency.exponentialRampToValueAtTime(1300, now + 0.15);
-                gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                // High-tech smooth teleport beam expansion (Real Gojo Vibe)
+                let osc = audioCtx.createOscillator();
+                let mod = audioCtx.createOscillator();
+                let modGain = audioCtx.createGain();
+                let gain = audioCtx.createGain();
+                
+                osc.type = 'sine'; osc.frequency.setValueAtTime(440, now);
+                osc.frequency.exponentialRampToValueAtTime(880, now + 0.15);
+                
+                mod.type = 'triangle'; mod.frequency.setValueAtTime(40, now);
+                modGain.gain.setValueAtTime(150, now);
+                
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+                
+                mod.connect(modGain); modGain.connect(osc.frequency);
                 osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(); osc.stop(now + 0.2);
+                
+                mod.start(); osc.start();
+                mod.stop(now + 0.22); osc.stop(now + 0.22);
             } else if (type === 'sukuna') {
-                // Dark slice/cutting tone
-                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(160, now);
-                osc.frequency.linearRampToValueAtTime(70, now + 0.18);
-                gain.gain.setValueAtTime(0.25, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-                osc.connect(gain); gain.connect(audioCtx.destination);
+                // Heavy metallic blade slice / Cleave Dismantle
+                let osc = audioCtx.createOscillator();
+                let filter = audioCtx.createBiquadFilter();
+                let gain = audioCtx.createGain();
+                
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(180, now);
+                osc.frequency.linearRampToValueAtTime(40, now + 0.2);
+                
+                filter.type = 'lowpass'; filter.frequency.setValueAtTime(800, now);
+                
+                gain.gain.setValueAtTime(0.35, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                
+                osc.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
                 osc.start(); osc.stop(now + 0.2);
             } else if (type === 'win') {
-                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-                osc.type = 'triangle'; osc.frequency.setValueAtTime(550, now);
-                osc.frequency.setValueAtTime(750, now + 0.1);
-                gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                let osc = audioCtx.createOscillator(); let gain = audioCtx.createGain();
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(587.33, now); // D5
+                osc.frequency.setValueAtTime(698.46, now + 0.08); // F5
+                osc.frequency.setValueAtTime(880, now + 0.16); // A5
+                gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
                 osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(); osc.stop(now + 0.3);
+                osc.start(); osc.stop(now + 0.35);
             }
         } catch(e){}
     }
@@ -161,7 +190,8 @@
     let p1Data = { name: "GOJO", icon: "⚡", style: "gojo-glow" };
     let p2Data = { name: "SUKUNA", icon: "💀", style: "sukuna-glow" };
 
-    function selectCharacter(char) {
+    function selectCharacter(char, e) {
+        if(e) e.stopPropagation();
         initAudio(); userCharacter = char;
         if(char === 'Gojo') {
             playAnimeSound('gojo');
@@ -178,7 +208,8 @@
         }
     }
 
-    function startGame() {
+    function startGame(e) {
+        if(e) e.stopPropagation();
         playAnimeSound('win');
         document.getElementById('charSelection').style.display = 'none';
         document.getElementById('gameContainer').style.display = 'block';
@@ -207,6 +238,7 @@
     }
 
     function handleCellClick(e) {
+        if(e) e.stopPropagation();
         initAudio();
         if (!isGameActive || isBotThinking) return;
         
@@ -222,7 +254,7 @@
 
         if (isVsBot) {
             currentPlayer = "P2"; updateTurnDisplay();
-            isBotThinking = true; setTimeout(botMove, 500);
+            isBotThinking = true; setTimeout(botMove, 450);
         } else {
             currentPlayer = (currentPlayer === "P1") ? "P2" : "P1";
             updateTurnDisplay();
@@ -240,14 +272,14 @@
         if (!isGameActive) { isBotThinking = false; return; }
         
         let move = null;
-        // Make the Bot imperfect! 40% chance it makes a random silly move so players can win!
-        if (Math.random() < 0.4) {
+        // 45% chance bot plays entirely dumb so customers can score wins smoothly
+        if (Math.random() < 0.45) {
             let emptyCells = [];
             for(let i=0; i<9; i++) { if(board[i] === "") emptyCells.push(i); }
             if(emptyCells.length > 0) move = emptyCells[Math.floor(Math.random() * emptyCells.length)];
         } 
         
-        // 60% chance or fallback: run standard smart move
+        // Smart fallback
         if (move === null) {
             let bestScore = -Infinity;
             for (let i = 0; i < 9; i++) {
@@ -291,7 +323,7 @@
         
         if (roundWon) {
             playAnimeSound('win'); 
-            isGameActive = false; // LOCK FURTHER CLICKS
+            isGameActive = false; // PERMANENT CLICK LOCK ON WIN
             let activeData = (currentPlayer === "P1") ? p1Data : p2Data;
             let finalName = activeData.name;
             if(isVsBot && currentPlayer === "P2") finalName = "BOT " + finalName;
@@ -300,21 +332,22 @@
         }
         if (!board.includes("")) { 
             statusText.innerHTML = "<span style='color:#fff; font-weight:bold;'>Match Draw! 🤝</span>"; 
-            isGameActive = false; 
+            isGameActive = false; // PERMANENT CLICK LOCK ON DRAW
             return true; 
         }
         return false;
     }
 
-    function restartGame() { 
+    function restartGame(e) { 
+        if(e) e.stopPropagation();
         board = ["", "", "", "", "", "", "", "", ""]; 
         isGameActive = true; isBotThinking = false; currentPlayer = "P1"; 
         updateTurnDisplay(); 
         cells.forEach(cell => { cell.innerHTML = ""; cell.className = "cell"; }); 
     }
     
-    pvpBtn.addEventListener('click', () => { if(isBotThinking) return; isVsBot = false; pvpBtn.classList.add('active'); pveBtn.classList.remove('active'); restartGame(); });
-    pveBtn.addEventListener('click', () => { if(isBotThinking) return; isVsBot = true; pveBtn.classList.add('active'); pvpBtn.classList.remove('active'); restartGame(); });
+    pvpBtn.addEventListener('click', (e) => { e.stopPropagation(); if(isBotThinking) return; isVsBot = false; pvpBtn.classList.add('active'); pveBtn.classList.remove('active'); restartGame(); });
+    pveBtn.addEventListener('click', (e) => { e.stopPropagation(); if(isBotThinking) return; isVsBot = true; pveBtn.classList.add('active'); pvpBtn.classList.remove('active'); restartGame(); });
     cells.forEach(cell => cell.addEventListener('click', handleCellClick)); resetBtn.addEventListener('click', restartGame);
 </script>
 
