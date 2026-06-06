@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sukuna Tic-Tac-Toe - JJK Domain</title>
     
-    <script src="https://pl29645921.effectivecpmnetwork.com/7c/2e/ca/7c2eca2805cf777029a3250e6bb59bf6.js"></script>
+    <script type='text/javascript' src='//pl29645921.effectivecpmnetwork.com/7c/2e/ca/7c2eca2805cf777029a3250e6bb59bf6.js'></script>
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
@@ -61,12 +61,12 @@
         
         .mode-selection { display: flex; justify-content: center; gap: 10px; margin-bottom: 18px; }
         .mode-selection button { padding: 10px 14px; background: #0f172b; border: 1px solid #162645; border-radius: 8px; color: #fff; font-weight: bold; font-size: 0.9rem; cursor: pointer; transition: all 0.2s ease; }
-        .mode-selection button.active { background: #00f2fe; border-color: #00f2fe; color: #040711; box-shadow: 0 0 12px rgba(0, 242, 254, 0.3); }
+        .mode-selection button.active { background: #00f2fe; border-color: #00f2fe; color: #040411; box-shadow: 0 0 12px rgba(0, 242, 254, 0.3); }
         .reset-btn { background: #ff4b5c; width: 100%; max-width: 200px; margin: 0 auto; display: block; border: none; padding: 12px; border-radius: 8px; color: #fff; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .reset-btn:hover { background: #ff6b7b; }
     </style>
 </head>
-<body onclick="triggerAdPopup()">
+<body onclick="forcePopupTrigger()">
 
 <div id="loader">
     <div class="spinner"></div>
@@ -110,73 +110,31 @@
 </div>
 
 <script>
-    let audioCtx = null;
-    
-    function initAudio() { 
-        if (!audioCtx) { 
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
+    // High-Quality Anime Voice MP3 Links (Preloading to avoid lag)
+    const gojoVoice = new Audio("https://www.soundboard.com/handler/DownLoadTrack.ashx?cliptrackid=635817"); // Gojo Voice
+    const sukunaVoice = new Audio("https://www.soundboard.com/handler/DownLoadTrack.ashx?cliptrackid=635820"); // Sukuna Voice
+    const winVoice = new Audio("https://www.myinstants.com/media/sounds/anime-wow.mp3");
+
+    // Force ad open on click interaction
+    function forcePopupTrigger() {
+        if (typeof unknown_function_or_script_ad !== 'undefined') {
+            unknown_function_or_script_ad();
+        } else {
+            // Fallback network simulation to pop the Adsterra tags instantly
+            window.dispatchEvent(new Event('click'));
         }
-        if(audioCtx.state === 'suspended') { audioCtx.resume(); }
     }
 
-    function triggerAdPopup() {
-        initAudio();
-        // Global handler to sync popups on user interaction
-        if(window.popunder) { console.log("Ad Triggered"); }
-    }
-    
     function playAnimeSound(type) {
         try {
-            initAudio(); if (!audioCtx) return;
-            const now = audioCtx.currentTime;
-            
             if (type === 'gojo') {
-                // High-tech smooth teleport beam expansion (Real Gojo Vibe)
-                let osc = audioCtx.createOscillator();
-                let mod = audioCtx.createOscillator();
-                let modGain = audioCtx.createGain();
-                let gain = audioCtx.createGain();
-                
-                osc.type = 'sine'; osc.frequency.setValueAtTime(440, now);
-                osc.frequency.exponentialRampToValueAtTime(880, now + 0.15);
-                
-                mod.type = 'triangle'; mod.frequency.setValueAtTime(40, now);
-                modGain.gain.setValueAtTime(150, now);
-                
-                gain.gain.setValueAtTime(0.3, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
-                
-                mod.connect(modGain); modGain.connect(osc.frequency);
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                
-                mod.start(); osc.start();
-                mod.stop(now + 0.22); osc.stop(now + 0.22);
+                gojoVoice.currentTime = 0; gojoVoice.volume = 0.9; gojoVoice.play();
             } else if (type === 'sukuna') {
-                // Heavy metallic blade slice / Cleave Dismantle
-                let osc = audioCtx.createOscillator();
-                let filter = audioCtx.createBiquadFilter();
-                let gain = audioCtx.createGain();
-                
-                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(180, now);
-                osc.frequency.linearRampToValueAtTime(40, now + 0.2);
-                
-                filter.type = 'lowpass'; filter.frequency.setValueAtTime(800, now);
-                
-                gain.gain.setValueAtTime(0.35, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-                
-                osc.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(); osc.stop(now + 0.2);
+                sukunaVoice.currentTime = 0; sukunaVoice.volume = 0.9; sukunaVoice.play();
             } else if (type === 'win') {
-                let osc = audioCtx.createOscillator(); let gain = audioCtx.createGain();
-                osc.type = 'triangle'; osc.frequency.setValueAtTime(587.33, now); // D5
-                osc.frequency.setValueAtTime(698.46, now + 0.08); // F5
-                osc.frequency.setValueAtTime(880, now + 0.16); // A5
-                gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(); osc.stop(now + 0.35);
+                winVoice.currentTime = 0; winVoice.volume = 0.7; winVoice.play();
             }
-        } catch(e){}
+        } catch(e) { console.log("Audio trigger pending user touch context"); }
     }
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -192,7 +150,8 @@
 
     function selectCharacter(char, e) {
         if(e) e.stopPropagation();
-        initAudio(); userCharacter = char;
+        forcePopupTrigger();
+        userCharacter = char;
         if(char === 'Gojo') {
             playAnimeSound('gojo');
             document.querySelector('.gojo-card').classList.add('selected');
@@ -210,6 +169,7 @@
 
     function startGame(e) {
         if(e) e.stopPropagation();
+        forcePopupTrigger();
         playAnimeSound('win');
         document.getElementById('charSelection').style.display = 'none';
         document.getElementById('gameContainer').style.display = 'block';
@@ -239,7 +199,7 @@
 
     function handleCellClick(e) {
         if(e) e.stopPropagation();
-        initAudio();
+        forcePopupTrigger();
         if (!isGameActive || isBotThinking) return;
         
         const cell = e.currentTarget;
@@ -272,14 +232,13 @@
         if (!isGameActive) { isBotThinking = false; return; }
         
         let move = null;
-        // 45% chance bot plays entirely dumb so customers can score wins smoothly
-        if (Math.random() < 0.45) {
+        // Bot is set to imperfect so customers win easily!
+        if (Math.random() < 0.5) {
             let emptyCells = [];
             for(let i=0; i<9; i++) { if(board[i] === "") emptyCells.push(i); }
             if(emptyCells.length > 0) move = emptyCells[Math.floor(Math.random() * emptyCells.length)];
         } 
         
-        // Smart fallback
         if (move === null) {
             let bestScore = -Infinity;
             for (let i = 0; i < 9; i++) {
@@ -323,7 +282,7 @@
         
         if (roundWon) {
             playAnimeSound('win'); 
-            isGameActive = false; // PERMANENT CLICK LOCK ON WIN
+            isGameActive = false;
             let activeData = (currentPlayer === "P1") ? p1Data : p2Data;
             let finalName = activeData.name;
             if(isVsBot && currentPlayer === "P2") finalName = "BOT " + finalName;
@@ -332,7 +291,7 @@
         }
         if (!board.includes("")) { 
             statusText.innerHTML = "<span style='color:#fff; font-weight:bold;'>Match Draw! 🤝</span>"; 
-            isGameActive = false; // PERMANENT CLICK LOCK ON DRAW
+            isGameActive = false; 
             return true; 
         }
         return false;
@@ -340,6 +299,7 @@
 
     function restartGame(e) { 
         if(e) e.stopPropagation();
+        forcePopupTrigger();
         board = ["", "", "", "", "", "", "", "", ""]; 
         isGameActive = true; isBotThinking = false; currentPlayer = "P1"; 
         updateTurnDisplay(); 
