@@ -66,7 +66,7 @@
         .reset-btn:hover { background: #ff6b7b; }
     </style>
 </head>
-<body onclick="triggerGlobalPopup()">
+<body onclick="handleUserInteraction(event)">
 
 <div id="loader">
     <div class="spinner"></div>
@@ -110,34 +110,46 @@
 </div>
 
 <script>
-    // Real MP3 Anime Audio Stream Links
-    const gojoAudio = new Audio("https://files.catbox.moe/kpk2g8.mp3"); // Gojo Domain Audio
-    const sukunaAudio = new Audio("https://files.catbox.moe/9vpt84.mp3"); // Sukuna Laugh/Attack Audio
-    const winAudio = new Audio("https://files.catbox.moe/f0p4by.mp3"); // Dramatic anime win hit
+    // Stable high-quality MP3 links hosted on ultra fast cloud stream
+    const gojoAudio = new Audio("https://files.catbox.moe/kpk2g8.mp3");
+    const sukunaAudio = new Audio("https://files.catbox.moe/9vpt84.mp3");
+    const expansionAudio = new Audio("https://files.catbox.moe/f0p4by.mp3");
 
-    // Preload tracks
-    gojoAudio.load(); sukunaAudio.load(); winAudio.load();
+    // Force preloading streams
+    gojoAudio.load(); sukunaAudio.load(); expansionAudio.load();
 
-    function triggerGlobalPopup() {
-        // Force browser click delegation for Adsterra scripts
+    let isAudioUnlocked = false;
+
+    // This unique bypass handler unlocks BOTH audio engines and popups on the very first user touch
+    function handleUserInteraction(e) {
+        if (!isAudioUnlocked) {
+            // Play & immediately pause to register browser media tokens safely
+            gojoAudio.play().then(() => { gojoAudio.pause(); gojoAudio.currentTime = 0; }).catch(err => {});
+            sukunaAudio.play().then(() => { sukunaAudio.pause(); sukunaAudio.currentTime = 0; }).catch(err => {});
+            expansionAudio.play().then(() => { expansionAudio.pause(); expansionAudio.currentTime = 0; }).catch(err => {});
+            isAudioUnlocked = true;
+        }
+
+        // Popunder direct force routing via system click proxy delegation
         if (typeof window.dispatchEvent === 'function') {
             try {
-                let ev = new MouseEvent('click', { bubbles: true, cancelable: true, view: window });
-                document.body.dispatchEvent(ev);
-            } catch(err){}
+                let proxyEvent = new MouseEvent('click', { bubbles: true, cancelable: true, view: window });
+                document.body.dispatchEvent(proxyEvent);
+            } catch(e){}
         }
     }
 
-    function playAnimeTrack(role) {
+    function playSorcererVoice(role) {
+        if(!isAudioUnlocked) return;
         try {
             if (role === 'gojo') {
                 gojoAudio.currentTime = 0; gojoAudio.volume = 1.0; gojoAudio.play();
             } else if (role === 'sukuna') {
                 sukunaAudio.currentTime = 0; sukunaAudio.volume = 1.0; sukunaAudio.play();
-            } else if (role === 'win') {
-                winAudio.currentTime = 0; winAudio.volume = 0.9; winAudio.play();
+            } else if (role === 'expansion') {
+                expansionAudio.currentTime = 0; expansionAudio.volume = 0.95; expansionAudio.play();
             }
-        } catch(e) { console.log("User interaction required first"); }
+        } catch(err){}
     }
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -153,16 +165,16 @@
 
     function selectCharacter(char, e) {
         if(e) e.stopPropagation();
-        triggerGlobalPopup();
+        handleUserInteraction();
         userCharacter = char;
         if(char === 'Gojo') {
-            playAnimeTrack('gojo');
+            playSorcererVoice('gojo');
             document.querySelector('.gojo-card').classList.add('selected');
             document.querySelector('.sukuna-card').classList.remove('selected');
             p1Data = { name: "GOJO", icon: "⚡", style: "gojo-glow" };
             p2Data = { name: "SUKUNA", icon: "💀", style: "sukuna-glow" };
         } else {
-            playAnimeTrack('sukuna');
+            playSorcererVoice('sukuna');
             document.querySelector('.sukuna-card').classList.add('selected');
             document.querySelector('.gojo-card').classList.remove('selected');
             p1Data = { name: "SUKUNA", icon: "💀", style: "sukuna-glow" };
@@ -172,8 +184,8 @@
 
     function startGame(e) {
         if(e) e.stopPropagation();
-        triggerGlobalPopup();
-        playAnimeTrack('win');
+        handleUserInteraction();
+        playSorcererVoice('expansion');
         document.getElementById('charSelection').style.display = 'none';
         document.getElementById('gameContainer').style.display = 'block';
         updateTurnDisplay();
@@ -202,7 +214,7 @@
 
     function handleCellClick(e) {
         if(e) e.stopPropagation();
-        triggerGlobalPopup();
+        handleUserInteraction();
         if (!isGameActive || isBotThinking) return;
         
         const cell = e.currentTarget;
@@ -210,7 +222,7 @@
         if (board[index] !== "") return;
 
         let activeData = (currentPlayer === "P1") ? p1Data : p2Data;
-        if(activeData.name === "GOJO") playAnimeTrack('gojo'); else playAnimeTrack('sukuna');
+        if(activeData.name === "GOJO") playSorcererVoice('gojo'); else playSorcererVoice('sukuna');
 
         makeMove(cell, index, currentPlayer);
         if (checkResult()) return;
@@ -253,7 +265,7 @@
 
         if (move !== null && move !== undefined) {
             const targetCell = document.querySelector(`[data-index='${move}']`);
-            if(p2Data.name === "GOJO") playAnimeTrack('gojo'); else playAnimeTrack('sukuna');
+            if(p2Data.name === "GOJO") playSorcererVoice('gojo'); else playSorcererVoice('sukuna');
             makeMove(targetCell, move, "P2");
             if (!checkResult()) { currentPlayer = "P1"; updateTurnDisplay(); }
         }
@@ -283,7 +295,7 @@
         for (let i = 0; i < winningConditions.length; i++) { const [a, b, c] = winningConditions[i]; if (board[a] && board[a] === board[b] && board[a] === board[c]) { roundWon = true; break; } }
         
         if (roundWon) {
-            playAnimeTrack('win'); 
+            playSorcererVoice('expansion'); 
             isGameActive = false;
             let activeData = (currentPlayer === "P1") ? p1Data : p2Data;
             let finalName = activeData.name;
@@ -301,7 +313,7 @@
 
     function restartGame(e) { 
         if(e) e.stopPropagation();
-        triggerGlobalPopup();
+        handleUserInteraction();
         board = ["", "", "", "", "", "", "", "", ""]; 
         isGameActive = true; isBotThinking = false; currentPlayer = "P1"; 
         updateTurnDisplay(); 
